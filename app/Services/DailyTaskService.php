@@ -112,10 +112,10 @@ class DailyTaskService
     }
 
     // Sumar puntos al resumen semanal actual
-    private function addToweeklySummary(int $points)
+    private function addToWeeklySummary(int $points)
     {
         $weekStart = Carbon::today()->startOfWeek(Carbon::MONDAY)->toDateString();
-        $weekEnd = CArbon::today()->endOfWeek(Carbon::SUNDAY)->toDateString();
+        $weekEnd = Carbon::today()->endOfWeek(Carbon::SUNDAY)->toDateString();
 
         $summary = WeeklyPointsSummary::firstOrCreate(
             [

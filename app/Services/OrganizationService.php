@@ -24,14 +24,12 @@ class OrganizationService
     // Mostrar una organizacion 
     public function show(Organization $organization)
     {
-        $this->checkOwner($organization);
         return $organization->load('teams');
     }
 
     // actualizar una Organization 
     public function update(Organization $organization, array $data)
     {
-        $this->checkOwner($organization);
         $organization->update($data);
         return $organization->fresh();
     }
@@ -39,15 +37,7 @@ class OrganizationService
     // Eliminar una organizacion 
     public function destroy(Organization $organization): void
     {
-        $this->checkOwner($organization);
         $organization->delete();
     }
 
-    // verifica que el usuario autenticado es el dueño 
-    private function checkOwner(Organization $organization)
-    {
-        if ($organization->owner_id !== Auth::id()) {
-            abort(403, 'No tienes permiso para realizar esta acción.');
-        }
-    }
 }

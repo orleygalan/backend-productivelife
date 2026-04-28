@@ -43,6 +43,7 @@ class OrganizationController extends Controller
     // GET /api/organizations/{organization}
     public function show(Organization $organization): JsonResponse
     {
+        $this->authorize('view', $organization);
         $organization = $this->organizationService->show($organization);
         return response()->json($organization);
     }
@@ -53,6 +54,7 @@ class OrganizationController extends Controller
     // PUT /api/organizations/{organization}
     public function update(UpdateOrganizationRequest $request, Organization $organization): JsonResponse
     {
+        $this->authorize('update', $organization);
         $organization = $this->organizationService->update($organization, $request->validated());
         return response()->json($organization);
     }
@@ -63,6 +65,7 @@ class OrganizationController extends Controller
     // DELETE /api/organizations/{organization}
     public function destroy(Organization $organization): JsonResponse
     {
+        $this->authorize('delete', $organization);
         $this->organizationService->destroy($organization);
         return response()->json(['message' => 'Organización eliminada correctamente.']);
     }
