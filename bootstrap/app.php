@@ -7,6 +7,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -25,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthenticationException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'No autenticado. Por favor inicia sesión.',
                 ], 401);
             }
@@ -34,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (AuthorizationException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'No tienes permiso para realizar esta acción.',
                 ], 403);
             }
@@ -43,7 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (ModelNotFoundException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'El recurso solicitado no existe.',
                 ], 404);
             }
@@ -52,7 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (NotFoundHttpException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'Recurso no encontrado.',
                 ], 404);
             }
@@ -61,7 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (MethodNotAllowedHttpException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'Metodo HTTP no permitido.',
                 ], 405);
             }
@@ -70,17 +71,31 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (ValidationException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
                     'message' => 'Los datos enviados no son validos.',
-                    'errors'  => $e->errors(),
+                    'errors' => $e->errors(),
                 ], 422);
             }
         });
-
-        $exceptions->render(function (Throwable $e, $request) {
+    
+        // Solo atrapa errores HTTP genericos
+        $exceptions->render(function (HttpException $e, $request) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'status'  => 'error',
+                    'status' => 'error',
+                    'message' => 'Error interno del servidor.',
+                ], $e->getStatusCode());
+            }
+        });
+
+        $exceptions->render(function (\Throwable $e, $request) {
+            if ($request->expectsJson()) {
+                // Si ya es una HttpException la dejamos pasar
+                if ($e instanceof HttpException) {
+                    return null;
+                }
+                return response()->json([
+                    'status' => 'error',
                     'message' => app()->isProduction()
                         ? 'Error interno del servidor.'
                         : $e->getMessage(),

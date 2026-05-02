@@ -31,13 +31,21 @@ class AuthController extends Controller
     // POST /api/auth/login
     public function login(LoginRequest $request): JsonResponse
     {
-        $data = $this->authService->login($request->validated());
+        try {
+            $data = $this->authService->login($request->validated());
 
-        return response()->json([
-            'message' => '¡Bienvenido!',
-            'user' => $data['user'],
-            'token' => $data['token'],
-        ]);
+            return response()->json([
+                'message' => '¡Bienvenido!',
+                'user' => $data['user'],
+                'token' => $data['token'],
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 401);
+        }
     }
 
     // POST /api/auth/logout

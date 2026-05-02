@@ -11,11 +11,12 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('team_members', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
             $table->enum('role', ['admin', 'editor', 'viewer'])->default('editor');
             $table->timestamp('joined_at')->useCurrent();
+            $table->timestamps();
             $table->unique(['user_id', 'team_id']); // un usuario no puede estar dos veces en el mismo equipo
         });
     }

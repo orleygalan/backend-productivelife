@@ -41,7 +41,7 @@ class AuthService
     {
         // Verificar credenciales
         if (!Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
-            abort(401, 'Credenciales incorrectas.');
+            throw new \Exception('Credenciales incorrectas.');
         }
 
         $user = Auth::user();
@@ -61,7 +61,10 @@ class AuthService
     // Logout
     public function logout(): void
     {
-        Auth::user()->currentAccessToken()->delete();
+        $token = Auth::user()->currentAccessToken();
+        if (method_exists($token, 'delete')) {
+            $token->delete();
+        }
     }
 
     // Cambiar modo work | life
