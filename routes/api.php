@@ -11,13 +11,13 @@ use App\Http\Controllers\Api\WeeklyPointsController;
 use Illuminate\Support\Facades\Route;
 
 // Publico 
-Route::prefix('auth')->group(function () {
+Route::middleware('throttle:auth')->prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
 });
 
 // Protegido
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Auth
     Route::prefix('auth')->group(function () {
