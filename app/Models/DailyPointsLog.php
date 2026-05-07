@@ -9,6 +9,7 @@ class DailyPointsLog extends Model
 {
     use HasUuids;
 
+    protected $table = 'daily_points_log';
     protected $fillable = [
         'points_earned',
         'log_date',
