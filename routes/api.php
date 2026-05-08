@@ -32,7 +32,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Equipos 
     Route::apiResource('teams', TeamController::class);
     Route::get('organizations/{organization}/teams', [TeamController::class, 'index']);
-    Route::post('teams/{team}/members', [TeamController::class, 'addMember']);
+    Route::post('teams/{team}/members', [TeamController::class, 'addMembers']);
     Route::delete('teams/{team}/members/{user}', [TeamController::class, 'removeMember']);
 
     // Proyectos 

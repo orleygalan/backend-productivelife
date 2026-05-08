@@ -25,6 +25,7 @@ class TeamController extends Controller
     // GET /api/organizations/{organization}/teams
     public function index(Organization $organization): JsonResponse
     {
+        $this->authorize('view', $organization);
         $team = $this->teamService->getAll($organization);
         return response()->json(TeamResource::collection($team));
     }
@@ -35,6 +36,9 @@ class TeamController extends Controller
     // POST /api/teams
     public function store(StoreTeamRequest $request): JsonResponse
     {
+        $organization = Organization::findOrFail($request->validated()['organization_id']);
+
+        $this->authorize('update', $organization);
         $team = $this->teamService->store($request->validated());
         return response()->json(new TeamResource($team), 201);
     }
@@ -45,6 +49,7 @@ class TeamController extends Controller
     // GET /api/teams/{team}
     public function show(Team $team): JsonResponse
     {
+        $this->authorize('view', $team);
         $team = $this->teamService->show($team);
         return response()->json(new TeamResource($team));
     }
@@ -55,6 +60,7 @@ class TeamController extends Controller
     // PUT /api/teams/{team}
     public function update(UpdateTeamRequest $request, Team $team): JsonResponse
     {
+        $this->authorize('manage', $team);
         $team = $this->teamService->update($team, $request->validated());
         return response()->json(new TeamResource($team));
     }
@@ -65,6 +71,7 @@ class TeamController extends Controller
     // DELETE /api/teams/{team}
     public function destroy(Team $team): JsonResponse
     {
+        $this->authorize('manage', $team);
         $this->teamService->destroy($team);
         return response()->json(['message' => 'Equipo eliminado correctamente.']);
     }
@@ -72,12 +79,14 @@ class TeamController extends Controller
     // POST /api/teams/{team}/members
     public function addMembers(Request $request, Team $team): JsonResponse
     {
+        $this->authorize('manage', $team);
+
         $request->validate([
-            'user_id' => ['required', 'uuid', 'exists:users,id'],
+            'email' => ['required', 'email', 'exists:users,email'],
             'role' => ['sometimes', 'in:admin,editor,viewer'],
         ]);
 
-        $this->teamService->addMember($team, $request->user_id, $request->role ?? 'editor');
+        $this->teamService->addMember($team, $request->email, $request->role ?? 'editor');
 
         return response()->json(['message' => 'Miembro agregado correctamente.']);
     }
@@ -85,6 +94,7 @@ class TeamController extends Controller
     // DELETE /api/teams/{team}/members/{user}
     public function removeMember(Team $team, string $userId): JsonResponse
     {
+        $this->authorize('manage', $team);
         $this->teamService->removeMember($team, $userId);
 
         return response()->json(['message' => 'Miembro eliminado correctamente.']);

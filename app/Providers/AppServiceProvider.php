@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Organization;
+use App\Models\Project;
+use App\Models\Team;
 use App\Policies\OrganizationPolicy;
+use App\Policies\ProjectPolicy;
+use App\Policies\TeamPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -26,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Organization::class, OrganizationPolicy::class);
+        Gate::policy(Team::class, TeamPolicy::class);
+        Gate::policy(Project::class, ProjectPolicy::class);
 
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(5)

@@ -25,6 +25,7 @@ class TaskController extends Controller
     // GET /api/projects/{project}/tasks
     public function index(Project $project): JsonResponse
     {
+        $this->authorize('view', $project);
         $tasks = $this->taskService->getAll($project);
         return TaskResource::collection($tasks)->response();
     }
@@ -35,6 +36,9 @@ class TaskController extends Controller
     // POST /api/tasks
     public function store(StoreTaskRequest $request): JsonResponse
     {
+        $project = Project::findOrFail($request->validated()['project_id']);
+        $this->authorize('view', $project);
+
         $task = $this->taskService->store($request->validated());
         return response()->json(new TaskResource($task), 201);
     }
@@ -45,6 +49,7 @@ class TaskController extends Controller
     // GET /api/tasks/{task}
     public function show(Task $task): JsonResponse
     {
+        $this->authorize('view', $task->project);
         $task = $this->taskService->show($task);
         return response()->json(new TaskResource($task));
     }
@@ -55,6 +60,7 @@ class TaskController extends Controller
     // PUT /api/tasks/{task}
     public function update(UpdateTaskRequest $request, Task $task): JsonResponse
     {
+        $this->authorize('view', $task->project);
         $task = $this->taskService->update($task, $request->validated());
         return response()->json(new TaskResource($task));
     }
@@ -65,6 +71,7 @@ class TaskController extends Controller
     // DELETE /api/tasks/{task}
     public function destroy(Task $task): JsonResponse
     {
+        $this->authorize('manage', $task->project);
         $this->taskService->destroy($task);
         return response()->json(['message' => 'Tarea eliminada correctamente .']);
     }
@@ -72,6 +79,8 @@ class TaskController extends Controller
     // PATCH /api/tasks/{task}/status
     public function changeStatus(Request $request, Task $task): JsonResponse
     {
+        $this->authorize('view', $task->project);
+
         $request->validate([
             'status' => ['required', 'in:todo,in_progress,done']
         ]);

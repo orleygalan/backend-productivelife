@@ -20,6 +20,7 @@ class ProjectController extends Controller
     // GET /api/teams/{team}/projects
     public function index(Team $team): JsonResponse
     {
+        $this->authorize('view', $team);
         $project = $this->projectService->getAll($team);
         return response()->json(ProjectResource::collection($project));
     }
@@ -27,6 +28,8 @@ class ProjectController extends Controller
     // POST /api/projects
     public function store(StoreProjectRequest $request): JsonResponse
     {
+        $team = Team::findOrFail($request->validated()['team_id']);
+        $this->authorize('manage', $team);
         $project = $this->projectService->store($request->validated());
         return response()->json(new ProjectResource($project), 201);
     }
@@ -34,6 +37,7 @@ class ProjectController extends Controller
     // GET /api/projects/{project}
     public function show(Project $project): JsonResponse
     {
+        $this->authorize('view', $project);
         $project = $this->projectService->show($project);
         return response()->json(new ProjectResource($project));
     }
@@ -41,6 +45,7 @@ class ProjectController extends Controller
     // PUT /api/projects/{project}
     public function update(UpdateProjectRequest $data, Project $project): JsonResponse
     {
+         $this->authorize('manage', $project);
         $project = $this->projectService->update($project, $data->validated());
         return response()->json(new ProjectResource($project));
     }
@@ -48,6 +53,7 @@ class ProjectController extends Controller
     // DELETE /api/projects/{project}
     public function destroy(Project $project): JsonResponse
     {
+        $this->authorize('manage', $project);
         $this->projectService->destroy($project);
         return response()->json(['message' => 'Proyecto eliminado correctamente.']);
     }
