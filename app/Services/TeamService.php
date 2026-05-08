@@ -62,9 +62,9 @@ class TeamService
     public function addMember(Team $team, string $email, string $role = 'editor'): void
     {
         // Buscamos ID por email para la tabla intermedia/pivot
-        $userId = User::where('email', $email)->firstOrFail();
+        $user = User::where('email', $email)->firstOrFail();
 
-        $team->members()->attach($userId, ['role' => $role]);
+        $team->members()->attach($user->id, ['role' => $role]);
     }
 
     // Eliminar miembro del equipo

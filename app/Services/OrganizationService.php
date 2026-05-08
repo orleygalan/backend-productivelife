@@ -9,7 +9,13 @@ class OrganizationService
 {
     public function getAll()
     {
-        return Organization::where('owner_id', Auth::id())->get();
+        $userId = Auth::id();
+
+        return Organization::where('owner_id', $userId)
+            ->orWhereHas('teams.members', function ($query) use ($userId) {
+                $query->where('users.id', $userId);
+            })
+            ->get();
     }
 
     // crear una organizacion 
