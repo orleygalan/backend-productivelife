@@ -64,34 +64,45 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
-    public function assignedTask(){
+    public function assignedTask()
+    {
         return $this->hasMany(Task::class, 'assigned_to');
     }
 
     // mode life 
 
-    public function dailyTasks(){
-        return $this->hasMany(DailyTask::class);
+    public function goals()
+    {
+        return $this->hasMany(Goal::class);
     }
 
-    public function dailyPointsLog(){
-        return $this->hasMany(DailyPointsLog::class);
+    public function dailyCompletions()
+    {
+        return $this->hasMany(DailyCompletion::class);
     }
 
-    public function weeklyPointsSummary(){
-        return $this->hasMany(WeeklyPointsSummary::class);
+    public function pointLogs()
+    {
+        return $this->hasMany(PointLog::class);
     }
 
-    public function points(){
+    public function points()
+    {
         return $this->hasOne(UserPoints::class);
     }
 
-    public function rewards(){
+    public function rewards()
+    {
         return $this->hasMany(Reward::class);
     }
 
-    public function redemptions(){
-        return $this->hasMany(RewardRedemption::class);
+    // obtiene o crea el balance del usuario
+    public function getOrCreatePoints(): UserPoints
+    {
+        return $this->points()->firstOrCreate(
+            ['user_id' => $this->id],
+            ['balance' => 0, 'total_earned' => 0, 'total_spent' => 0]
+        );
     }
 
 }

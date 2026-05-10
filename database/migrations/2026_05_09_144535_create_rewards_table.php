@@ -10,8 +10,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::create('rewards', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
+            // Costo en puntos - debe ser alto
+            $table->integer('points_cost');
             $table->softDeletes();
+            $table->timestamps();
         });
     }
 
@@ -20,8 +26,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropSoftDeletes();
-        });
+        Schema::dropIfExists('rewards');
     }
 };

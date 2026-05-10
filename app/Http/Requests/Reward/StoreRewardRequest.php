@@ -22,7 +22,7 @@ class StoreRewardRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'min:3', 'max:100'],
+            'name' => ['required', 'string', 'min:3', 'max:255'],
             'points_cost' => ['required', 'integer', 'min:1'],
         ];
     }
@@ -31,9 +31,13 @@ class StoreRewardRequest extends FormRequest
     {
         return [
             'name.required' => 'El nombre de la recompensa es obligatorio.',
+            'name.string' => 'El nombre debe ser un texto válido.',
             'name.min' => 'El nombre debe tener al menos 3 caracteres.',
+            'name.max' => 'El nombre no puede superar los 255 caracteres.',
+
             'points_cost.required' => 'El costo en puntos es obligatorio.',
-            'points_cost.min' => 'El costo debe ser al menos 1 punto.',
+            'points_cost.integer' => 'El costo en puntos debe ser un número entero.',
+            'points_cost.min' => 'El costo en puntos debe ser al menos 1.',
         ];
     }
 }

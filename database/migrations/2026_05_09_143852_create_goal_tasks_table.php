@@ -10,12 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('daily_points_log', function (Blueprint $table) {
+        Schema::create('goal_tasks', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignUuid('daily_task_id')->constrained('daily_tasks')->cascadeOnDelete();
-            $table->integer('points_earned');
-            $table->date('log_date');
+            $table->foreignUuid('goal_id')->constrained()->cascadeOnDelete();
+            $table->string('title');
+            $table->integer('xp_per_day');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('daily_points_log');
+        Schema::dropIfExists('goal_tasks');
     }
 };

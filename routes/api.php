@@ -1,13 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DailyTaskController;
+use App\Http\Controllers\Api\GoalController;
 use App\Http\Controllers\Api\OrganizationController;
+use App\Http\Controllers\Api\PointController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\RewardController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TeamController;
-use App\Http\Controllers\Api\WeeklyPointsController;
 use Illuminate\Support\Facades\Route;
 
 // Publico 
@@ -46,17 +46,36 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Modo life 
 
-    // Daily-task 
-    Route::apiResource('daily-tasks', DailyTaskController::class)->except(['show']);
-    Route::patch('daily-tasks/{daily_task}/complete', [DailyTaskController::class, 'complete']);
-    Route::patch('daily-tasks/{daily_task}/uncomplete', [DailyTaskController::class, 'uncomplete']);
+    Route::prefix('goals')->group(function () {
+        Route::get('/', [GoalController::class, 'index']);
+        Route::post('/', [GoalController::class, 'store']);
 
-    // Reward 
-    Route::apiResource('rewards', RewardController::class)->except(['show']);
-    Route::post('rewards/{reward}/redeem', [RewardController::class, 'redeem']);
-    Route::get('rewards/redemptions', [RewardController::class, 'redemptions']);
+        Route::prefix('{goal}')->group(function () {
+            Route::get('/', [GoalController::class, 'show']);
+            Route::put('/', [GoalController::class, 'update']);
+            Route::delete('/', [GoalController::class, 'destroy']);
 
-    // weekly-points
-    Route::get('weekly-points/current', [WeeklyPointsController::class, 'current']);
-    Route::get('weekly-points/history', [WeeklyPointsController::class, 'history']);
+            // Ver tareas del dia de esta meta
+            Route::get('/today', [GoalController::class, 'today']);
+
+            // Tareas de la meta
+            Route::post('/tasks', [GoalController::class, 'addTask']);
+            Route::put('/tasks/{task}', [GoalController::class, 'updateTask']);
+            Route::delete('/tasks/{task}', [GoalController::class, 'deleteTask']);
+
+            // Completar / descompletar tarea diaria
+            Route::post('/tasks/{task}/complete', [GoalController::class, 'complete']);
+            Route::delete('/tasks/{task}/complete', [GoalController::class, 'uncomplete']);
+        });
+    });
+
+    // Puntos
+    Route::prefix('points')->group(function () {
+        Route::get('/balance', [PointController::class, 'balance']);
+        Route::get('/logs', [PointController::class, 'logs']);
+    });
+
+    // Recompensas
+        Route::apiResource('rewards', RewardController::class);
+        Route::post('rewards/{reward}/redeem', [RewardController::class, 'redeem']);
 });

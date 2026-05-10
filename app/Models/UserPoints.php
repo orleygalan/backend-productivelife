@@ -11,27 +11,35 @@ class UserPoints extends Model
 
     protected $fillable = [
         'user_id',
-        'total_points',
-        'level',
-        'streak_days',
-        'last_active'
+        'balance',
+        'total_earned',
+        'total_spent',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'last_active' => 'date',
-        ];
-    }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Calcula el nivel según los puntos totales
-    public function calculateLevel(): int
+
+    // Sumar puntos ganados
+    public function addPoints(int $amount): void
     {
-        return (int) floor($this->total_points / 500) + 1;
+        $this->increment('balance', $amount);
+        $this->increment('total_earned', $amount);
+    }
+
+    // Restar puntos gastados
+    public function spendPoints(int $amount): void
+    {
+        $this->decrement('balance', $amount);
+        $this->increment('total_spent', $amount);
+    }
+
+    // Verifica si tiene suficientes puntos
+    public function hasEnough(int $amount): bool
+    {
+        return $this->balance >= $amount;
     }
 }

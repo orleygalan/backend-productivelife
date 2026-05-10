@@ -22,7 +22,7 @@ class UpdateRewardRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string', 'min:3', 'max:100'],
+            'name' => ['sometimes', 'string', 'min:3', 'max:255'],
             'points_cost' => ['sometimes', 'integer', 'min:1'],
         ];
     }
@@ -30,9 +30,12 @@ class UpdateRewardRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'name.string' => 'El nombre debe ser un texto válido.',
             'name.min' => 'El nombre debe tener al menos 3 caracteres.',
-            'name.max' => 'El nombre debe tener menos de 100 caracteres.',
-            'points_cost.min' => 'El costo debe ser al menos 1 punto.',
+            'name.max' => 'El nombre no puede superar los 255 caracteres.',
+
+            'points_cost.integer' => 'El costo en puntos debe ser un número entero.',
+            'points_cost.min' => 'El costo en puntos debe ser al menos 1.',
         ];
     }
 }

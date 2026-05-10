@@ -12,11 +12,13 @@ return new class extends Migration {
     {
         Schema::create('user_points', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->integer('total_points')->default(0);
-            $table->integer('level')->default(1);
-            $table->integer('streak_days')->default(0);
-            $table->date('last_active')->nullable();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete()->unique();
+            // Balance actual (ganado - gastado)
+            $table->integer('balance')->default(0);
+            // Total histórico ganado
+            $table->integer('total_earned')->default(0);
+            // Total historico gastado
+            $table->integer('total_spent')->default(0);
             $table->timestamps();
         });
     }

@@ -8,67 +8,65 @@ use App\Http\Requests\Reward\UpdateRewardRequest;
 use App\Http\Resources\RewardResource;
 use App\Models\Reward;
 use App\Services\RewardService;
-use Illuminate\Http\JsonResponse;
 
 class RewardController extends Controller
 {
-
     public function __construct(
-        private RewardService $rewardService
+        private RewardService $rewardService,
     ) {
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     // GET /api/rewards
-    public function index(): JsonResponse
+    public function index()
     {
         $rewards = $this->rewardService->getAll();
         return response()->json(RewardResource::collection($rewards));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     // POST /api/rewards
-    public function store(StoreRewardRequest $request): JsonResponse
+    public function store(StoreRewardRequest $request)
     {
-        $reward = $this->rewardService->store($request->validated());
-        return response()->json(new RewardResource($reward), 201);
+        $reward = $this->rewardService->store($request->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Recompensa creada correctamente.',
+            'data' => new RewardResource($reward),
+        ], 201);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     // PUT /api/rewards/{reward}
-    public function update(UpdateRewardRequest $request, Reward $reward): JsonResponse
+    public function update(UpdateRewardRequest $request, Reward $reward)
     {
-        $reward = $this->rewardService->update($reward, $request->validated());
-        return response()->json(new RewardResource($reward));
+        $this->authorize('update', $reward);
+        $reward = $this->rewardService->update($reward, $request->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Recompensa actualizada correctamente.',
+            'data' => new RewardResource($reward),
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     // DELETE /api/rewards/{reward}
-    public function destroy(Reward $reward): JsonResponse
+    public function destroy(Reward $reward)
     {
+        $this->authorize('delete', $reward);
         $this->rewardService->destroy($reward);
-        return response()->json(['message' => 'Recompensa eliminada correctamente.']);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Recompensa eliminada correctamente.',
+        ]);
     }
 
     // POST /api/rewards/{reward}/redeem
-    public function redeem(Reward $reward): JsonResponse
+    public function redeem(Reward $reward)
     {
-        $redemption = $this->rewardService->redeem($reward);
-        return response()->json($redemption, 201);
-    }
-
-    // GET /api/rewards/redemptions
-    public function redemptions(): JsonResponse
-    {
-        $redemptions = $this->rewardService->getRedemptions();
-        return response()->json($redemptions);
+        $this->authorize('redeem', $reward);
+        $this->rewardService->redeem($reward);
+        return response()->json([
+            'status' => 'success',
+            'message' => "Recompensa '{$reward->name}' canjeada correctamente.",
+        ]);
     }
 }

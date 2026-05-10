@@ -10,9 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('organizations', function (Blueprint $table) {
+        Schema::create('teams', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('organization_id')->constrained('organizations')->cascadeOnDelete();
+            $table->string('name');
             $table->softDeletes();
-
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('organizations', function (Blueprint $table) {
-            $table->dropSoftDeletes();
-        });
+        Schema::dropIfExists('teams');
     }
 };

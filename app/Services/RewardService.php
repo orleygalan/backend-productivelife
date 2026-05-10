@@ -3,21 +3,25 @@
 namespace App\Services;
 
 use App\Models\Reward;
-use App\Models\RewardRedemption;
-use App\Models\WeeklyPointsSummary;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RewardService
 {
-    // Mostrar todas las recompensas del usuario 
-    public function getAll()
+    public function __construct(private PointService $pointService)
     {
-        $reward = Reward::where('user_id', Auth::id())->get();
-        return $reward;
     }
 
-    // Crear recompensa 
+    // Listar recompensas
+    public function getAll()
+    {
+        return Reward::where('user_id', Auth::id())
+            ->orderBy('points_cost', 'asc')
+            ->get();
+    }
+
+    // Crear recompensa
     public function store(array $data)
     {
         return Reward::create([
@@ -27,71 +31,43 @@ class RewardService
         ]);
     }
 
-    // Actualizar recompesa 
+    // Actualizar recompensa
     public function update(Reward $reward, array $data)
     {
-        $this->checkOwner($reward);
         $reward->update($data);
-        return $reward->refresh();
+        return $reward->fresh();
     }
 
-    // ELiminar recompesa
+    // Eliminar recompensa
     public function destroy(Reward $reward): void
     {
-        $this->checkOwner($reward);
         $reward->delete();
     }
 
-    // Canjear las recompesas solo los domingos 
-    public function redeem(Reward $reward)
+    // Canjear recompensa
+    public function redeem(Reward $reward): void
     {
-        $this->checkOwner($reward);
-
+        // Solo los domingos
         if (!Carbon::today()->isSunday()) {
-            abort(422, 'Solo puedes canjear recompesas los domingos.');
+            abort(422, 'Las recompensas solo se pueden canjear los domingos.');
         }
 
-        // obtener resumen de la semana 
-        $weekStart = Carbon::now()->startOfWeek(Carbon::MONDAY)->toDateString();
-        $summary = WeeklyPointsSummary::where('user_id', Auth::id())
-            ->where('week_start', $weekStart)
-            ->first();
+        $userId = Auth::id();
+        $userPoints = $this->pointService->getBalance($userId);
 
-        if (!$summary) {
-            abort(422, 'No tienes puntos acumulados esta semana.');
+        // Verificar saldo suficiente
+        if (!$userPoints->hasEnough($reward->points_cost)) {
+            abort(422, "No tienes suficientes puntos. Necesitas {$reward->points_cost} y tienes {$userPoints->balance}.");
         }
 
-        // Verifica que tienes puntos 
-        if ($summary->total_points < $reward->points_cost) {
-            abort(422, "No tienes suficientes puntos. Necesitas {$reward->points_cost} pts y tienes {$summary->total_points} pts.");
-        }
-
-        // Descontar puntos del resumen semanal
-        $summary->decrement('total_points', $reward->points_cost);
-
-        // Registrar el canje
-        return RewardRedemption::create([
-            'user_id' => Auth::id(),
-            'reward_id' => $reward->id,
-            'weekly_summary_id' => $summary->id,
-            'redeemed_on' => Carbon::today(),
-        ]);
+        DB::transaction(function () use ($reward, $userId) {
+            $this->pointService->subtractPoints(
+                userId: $userId,
+                amount: $reward->points_cost,
+                type: 'reward_redeem',
+                description: "Recompensa canjeada: '{$reward->name}'",
+            );
+        });
     }
 
-    // Historial de canjes del usuario
-    public function getRedemptions()
-    {
-        return RewardRedemption::where('user_id', Auth::id())
-            ->with(['reward', 'weeklySummary'])
-            ->orderByDesc('redeemed_on')
-            ->get();
-    }
-
-    // Verificar que sea el dueño 
-    private function checkOwner(Reward $reward): void
-    {
-        if ($reward->user_id !== Auth::id()) {
-            abort(403, 'No tienes permiso para realizar esta acción.');
-        }
-    }
 }

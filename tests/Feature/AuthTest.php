@@ -121,4 +121,18 @@ class AuthTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure(['id', 'name', 'email', 'mode']);
     }
+
+    public function test_user_can_switch_mode(): void
+    {
+        $user = User::factory()->create(['mode' => 'work']);
+
+        $response = $this->actingAs($user)
+            ->patchJson('/api/auth/mode', ['mode' => 'life']);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'mode' => 'life',
+        ]);
+    }
 }

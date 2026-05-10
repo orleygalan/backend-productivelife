@@ -10,10 +10,10 @@ class UserPointsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'total_points' => $this->total_points,
-            'level' => $this->level,
-            'streak_days' => $this->streak_days,
-            'last_active' => $this->last_active,
+            'id' => $this->id,
+            'balance' => $this->balance,
+            'total_earned' => $this->total_earned,
+            'total_spent' => $this->total_spent,
         ];
     }
 }
