@@ -111,7 +111,7 @@ class DailyCompletionService
     }
 
     // Obtener tareas del dia para una meta
-    public function getTodayTasks(Goal $goal): array
+    public function getTodayTasks(Goal $goal)
     {
         $userId = Auth::id();
         $today = Carbon::today()->toDateString();
