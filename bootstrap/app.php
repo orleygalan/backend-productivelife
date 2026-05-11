@@ -96,7 +96,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Error interno del servidor.',
+                    'message' => $e->getStatusCode(),
                 ], $e->getStatusCode());
             }
         });
