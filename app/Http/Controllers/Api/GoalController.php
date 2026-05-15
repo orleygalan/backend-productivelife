@@ -118,11 +118,12 @@ class GoalController extends Controller
     public function today(Goal $goal)
     {
         $this->authorize('view', $goal);
+        $goal->load('tasks');
         $tasks = $this->dailyCompletionService->getTodayTasks($goal);
         $points = $this->pointService->getBalance();
 
         return response()->json([
-            'goal' => new GoalResource($goal->load('tasks')),
+            'goal' => new GoalResource($goal),
             'tasks' => GoalTaskResource::collection($tasks),
             'balance' => $points->balance,
         ]);
